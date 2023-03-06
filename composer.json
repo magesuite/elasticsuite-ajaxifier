@@ -9,8 +9,7 @@
         "registration.php"
       ],
       "psr-4": {
-        "MageSuite\\SuccessPageRegistration\\": ""
+        "MageSuite\\ElasticsuiteAjaxifier\\": ""
       }
     }
   }
-  
