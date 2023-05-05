@@ -5,11 +5,11 @@
     "homepage": "https://creativestyle.de",
     "license": "OSL-3.0",
     "autoload": {
-      "files": [
-        "registration.php"
-      ],
-      "psr-4": {
-        "MageSuite\\ElasticsuiteAjaxifier\\": ""
-      }
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "MageSuite\\ElasticsuiteAjaxifier\\": ""
+        }
     }
-  }
+}

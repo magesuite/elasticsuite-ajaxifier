@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="magesuite" translate="label" sortOrder="300">
+            <label>MageSuite</label>
+        </tab>
+        <section id="ajaxifier" translate="label" type="text" sortOrder="1010" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Ajaxifier</label>
+            <tab>magesuite</tab>
+            <resource>MageSuite_ElasticsuiteAjaxifier::infinite_scroll</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="infinite_scroll" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Infinite scroll</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="media_breakpoint" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Media breakpoint</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[Determines when infinite scroll should start.<br>E.g. (max-width: 768px). If 0, infinite scroll will work on all resolutions.]]></comment>
+                </field>
+                <field id="trigger_prev_type" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Trigger previous type</label>
+                    <source_model>MageSuite\ElasticsuiteAjaxifier\Model\Config\Source\TriggerTypePrev</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[How should "Fetch previous" button look like.]]></comment>
+                </field>
+                <field id="trigger_prev_label" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Trigger previous label</label>
+                    <comment><![CDATA[You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="trigger_prev_type">button</field>
+                    </depends>
+                </field>
+                <field id="trigger_next_type" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Trigger next type</label>
+                    <source_model>MageSuite\ElasticsuiteAjaxifier\Model\Config\Source\TriggerTypeNext</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[How should "Fetch more" button look like.]]></comment>
+                </field>
+                <field id="trigger_next_label" translate="label" type="text" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Trigger next label</label>
+                    <comment><![CDATA[You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="auto_fetch_next" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto fetch next</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Determines whether next products should be fetched automatically.]]></comment>
+                </field>
+                <field id="auto_fetch_limit" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto fetch limit</label>
+                    <validate>required-entry validate-number validate-zero-or-greater</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="auto_fetch_next">1</field>
+                    </depends>
+                    <comment><![CDATA[Determines maximum auto-fetch number. If 0, no limit.]]></comment>
+                </field>
+                <field id="observer_threshold" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Observer threshold</label>
+                    <validate>required-entry validate-number validate-zero-or-greater</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="auto_fetch_next">1</field>
+                    </depends>
+                    <comment><![CDATA[Distance before the end of the listing, when autofetch should start.]]></comment>
+                </field>
+                <field id="next_items_indicator" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show next items indicator</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Displays any text, if there are more products to fetch.]]></comment>
+                </field>
+                <field id="next_items_indicator_label" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Next items indicator label</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="next_items_indicator">1</field>
+                    </depends>
+                    <comment><![CDATA[Text displayed when there are more products to fetch. e.g. <b>Showing %c of %t products</b>.<br>You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
+                </field>
+                <field id="item_selector" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Item selector</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[Product css selector e.g. <b>.cs-grid-layout__brick</b>]]></comment>
+                </field>
+                <field id="container_selector" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Container selector</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[Products container css selector e.g. <b>.products.list.items</b>]]></comment>
+                </field>
+                <field id="toolbar_selector" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Toolbar selector</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[Toolbar css selector e.g. <b>.cs-toolbar__item--pagination</b>]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
