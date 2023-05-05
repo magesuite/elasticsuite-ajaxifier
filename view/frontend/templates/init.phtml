@@ -1,0 +1,12 @@
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+/** @var $viewModel \MageSuite\ElasticsuiteAjaxifier\ViewModel\Init */
+$viewModel = $block->getViewModel();
+?>
+<script type="text/x-magento-init">
+{
+    "body": {
+        "MageSuite_ElasticsuiteAjaxifier/js/infinite-scroll": <?= /* @noEscape */ $viewModel->getInitDataForJS() ?>
+    }
+}
+</script>

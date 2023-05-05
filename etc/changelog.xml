@@ -1,0 +1,13 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:MageSuite_Changelog:etc/changelog.xsd">
+    <module id="MageSuite_ElasticsuiteAjaxifier" name="MageSuite_ElasticsuiteAjaxifier">
+        <changelog>
+            <tag version="1.0.0" date="2023-04-17">
+                <entry>
+                    <type>INIT</type>
+                    <overview>Module prerelease</overview>
+                    <description>The Infinite Scroll functionality added for testing purporses.</description>
+                </entry>
+            </tag>
+        </changelog>
+    </module>
+</config>

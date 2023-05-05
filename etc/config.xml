@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <ajaxifier>
+            <general>
+                <enabled>1</enabled>
+            </general>
+            <infinite_scroll>
+                <enabled>1</enabled>
+                <media_breakpoint>(max-width: 768px)</media_breakpoint>
+                <trigger_prev_type>none</trigger_prev_type>
+                <trigger_prev_label>Previous</trigger_prev_label>
+                <trigger_next_type>none</trigger_next_type>
+                <trigger_next_label>Next</trigger_next_label>
+                <auto_fetch_next>1</auto_fetch_next>
+                <auto_fetch_limit>0</auto_fetch_limit>
+                <next_items_indicator>0</next_items_indicator>
+                <next_items_indicator_label>Showing %c of %t products</next_items_indicator_label>
+                <item_selector>.cs-grid-layout__brick:not(.cs-grid-layout__brick--teaser)</item_selector>
+                <container_selector>.products.list.items</container_selector>
+                <toolbar_selector>.cs-toolbar__item--pagination</toolbar_selector>
+                <observer_threshold>100</observer_threshold>
+            </infinite_scroll>
+        </ajaxifier>
+    </default>
+</config>

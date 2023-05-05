@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Block\Product\ProductList\Toolbar">
+        <plugin name="add_catalog_toolbar_options" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Catalog\Block\Product\ProductList\Toolbar\AddCatalogToolbarOptions"/>
+    </type>
+    <type name="Smile\ElasticsuiteCatalog\Block\Navigation\Renderer\Slider">
+        <plugin name="add_slider_toolbar_options" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Smile\ElasticsuiteCatalog\Block\Navigation\Renderer\Slider\AddSliderToolbarOptions"/>
+    </type>
+    <type name="Magento\Catalog\Controller\Category\View">
+        <plugin sortOrder="1" name="load_ajax_category_view" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Framework\App\Action\HttpPostActionInterface\LoadJsonResponse"/>
+    </type>
+    <type name="Magento\CatalogSearch\Controller\Result\Index">
+        <plugin sortOrder="1" name="load_ajax_search_view" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Framework\App\Action\HttpPostActionInterface\LoadJsonResponse"/>
+    </type>
+    <type name="Magento\Framework\App\PageCache\Identifier">
+        <plugin name="add_ajax_to_cache" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Framework\App\PageCache\Identifier\AddAjaxToCache"/>
+    </type>
+    <type name="Magento\Framework\App\View">
+        <plugin name="prevent_rendering_for_ajax_response" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Framework\App\View\PreventLayoutRenderForAjaxResponse"/>
+    </type>
+    <type name="\MageSuite\ElasticsuiteAjaxifier\Model\BlockMapping">
+        <arguments>
+            <argument name="productListBlockMapping" xsi:type="array">
+                <item name="catalogsearch_result_index" xsi:type="string">search_result_list</item>
+                <item name="catalog_category_view" xsi:type="string">category.products.list</item>
+            </argument>
+            <argument name="navBlockMapping" xsi:type="array">
+                <item name="catalogsearch_result_index" xsi:type="string">catalogsearch.leftnav</item>
+                <item name="catalog_category_view" xsi:type="string">catalog.leftnav</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
