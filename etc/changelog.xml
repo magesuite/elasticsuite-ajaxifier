@@ -8,6 +8,16 @@
                     <description>The Infinite Scroll functionality added for testing purporses.</description>
                 </entry>
             </tag>
+            <tag version="1.0.1" date="2023-05-10">
+                <entry>
+                    <type>FEAT</type>
+                    <overview>Hiding the image teasers</overview>
+                    <description>
+                        Added feature that allows the client to skip image teasers on the content loaded by the
+                        infinity scroll.
+                    </description>
+                </entry>
+            </tag>
         </changelog>
     </module>
 </config>

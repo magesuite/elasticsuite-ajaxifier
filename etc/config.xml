@@ -20,6 +20,7 @@
                 <container_selector>.products.list.items</container_selector>
                 <toolbar_selector>.cs-toolbar__item--pagination</toolbar_selector>
                 <observer_threshold>100</observer_threshold>
+                <hide_teasers>1</hide_teasers>
             </infinite_scroll>
         </ajaxifier>
     </default>
