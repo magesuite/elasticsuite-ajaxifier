@@ -18,6 +18,12 @@
     <type name="Magento\Framework\App\View">
         <plugin name="prevent_rendering_for_ajax_response" type="MageSuite\ElasticsuiteAjaxifier\Plugin\Framework\App\View\PreventLayoutRenderForAjaxResponse"/>
     </type>
+    <type name="MageSuite\ContentConstructorFrontend\Block\Component\ImageTeaser">
+        <plugin name="skip_teaser_grid" type="MageSuite\ElasticsuiteAjaxifier\Plugin\MageSuite\ContentConstructorFrontend\Block\Component\ImageTeaser\SkipTeaserGrid"/>
+    </type>
+    <type name="MageSuite\ContentConstructorFrontend\Model\Component\ImageTeaser">
+        <plugin name="skip_teaser_slides" type="MageSuite\ElasticsuiteAjaxifier\Plugin\MageSuite\ContentConstructorFrontend\Model\Component\ImageTeaser\SkipTeaserSlides"/>
+    </type>
     <type name="\MageSuite\ElasticsuiteAjaxifier\Model\BlockMapping">
         <arguments>
             <argument name="productListBlockMapping" xsi:type="array">

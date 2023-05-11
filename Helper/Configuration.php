@@ -21,6 +21,7 @@ class Configuration
     public const XML_PATH_INFINITE_SCROLL_CONTAINER_SELECTOR = 'ajaxifier/infinite_scroll/container_selector';
     public const XML_PATH_INFINITE_SCROLL_TOOLBAR_SELECTOR = 'ajaxifier/infinite_scroll/toolbar_selector';
     public const XML_PATH_INFINITE_SCROLL_OBSERVER_THRESHOLD = 'ajaxifier/infinite_scroll/observer_threshold';
+    public const XML_PATH_INFINITE_SCROLL_HIDE_TEASERS = 'ajaxifier/infinite_scroll/hide_teasers';
 
     protected \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig;
 
@@ -66,5 +67,10 @@ class Configuration
             'toolbarPaginationSelector' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_TOOLBAR_SELECTOR),
             'observerThreshold' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_OBSERVER_THRESHOLD)
         ];
+    }
+
+    public function isTeaserHidingEnabled(): bool
+    {
+        return (bool)$this->getValue(self::XML_PATH_INFINITE_SCROLL_HIDE_TEASERS);
     }
 }

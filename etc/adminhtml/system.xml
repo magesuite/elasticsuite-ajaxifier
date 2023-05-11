@@ -126,6 +126,14 @@
                     </depends>
                     <comment><![CDATA[Toolbar css selector e.g. <b>.cs-toolbar__item--pagination</b>]]></comment>
                 </field>
+                <field id="hide_teasers" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hide image teasers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment>When enabled hides image teasers in content loaded by the infinity scroll</comment>
+                </field>
             </group>
         </section>
     </system>
