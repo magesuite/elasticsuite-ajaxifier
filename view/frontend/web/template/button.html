@@ -1,0 +1,12 @@
+<button class="cs-infinite-scroll__button cs-infinite-scroll__button--<%= data.direction %>"
+        data-url="<%= data.url %>"
+        data-direction="<%= data.direction %>">
+    <span class="cs-infinite-scroll__button-span" data-role="label"></span>
+    <% if (data.arrow) { %>
+    <img
+        class="cs-infinite-scroll__button-icon inline-svg"
+        src="<%= data.arrow  %>"
+        alt=""
+    />
+    <% } %>
+</button>

@@ -2,7 +2,13 @@ define([
     'jquery',
     'matchMedia',
     'mage/translate',
-], function ($, mediaCheck, $t) {
+    'mage/url',
+    'mgsElasticsuiteInteractionElement',
+    'text!MageSuite_ElasticsuiteAjaxifier/template/button.html',
+    'text!MageSuite_ElasticsuiteAjaxifier/template/indicator.html',
+    'text!MageSuite_ElasticsuiteAjaxifier/template/observable_area.html',
+    'text!MageSuite_ElasticsuiteAjaxifier/template/product_tile.html'
+], function ($, mediaCheck, $t, url, InteractionElement, buttonTpl, indicatorTpl, observableAreaTpl, productTileTpl) {
     'use strict';
 
     /**
@@ -10,15 +16,15 @@ define([
      * -> Options are parsed to correct types
      * -> Depending on media breakpoint, _create runs _toggleInfiniteScroll which:
      *    -> Initializes Intersection Observer
-     *    -> Initializes ui elements (observer areas, buttons, fake product tiles).
-     *       Ui elements are wrappers for HTML elements with their own methods.
+     *    -> Initializes InteractionElements (observer areas, buttons, fake product tiles).
+     *       InteractionElements are wrappers for HTML elements with their own methods.
      * -> When user clicks on trigger (button, product tile), _clickHandler fires _loadPage.
      * -> When users scrolls to the end of listing, this.observer fires _loadPage.
      * -> _loadPage fetches new products, passes them to _afterPageLoad.
-     * -> _afterPageLoad puts response to listing and triggers _updateUiElements.
-     * -> _updateUiElements sets new urls and/or removes unnecessary ui elements.
+     * -> _afterPageLoad puts response to listing and triggers _updateInteractionElements.
+     * -> _updateInteractionElements sets new urls and/or removes unnecessary elements.
      */
-    $.widget('mgs.infniteScroll', {
+    $.widget('mgs.elasticsuiteInfiniteScroll', {
         options: {
             infinite: {
                 mediaBreakpoint: false,
@@ -26,6 +32,7 @@ define([
                 triggerPrevLabel: $t('Previous items'),
                 triggerNextType: 'none',
                 triggerNextLabel: $t('Next items'),
+                triggerButtonArrowUrl: 'images/icons/button/icon-default-primary.svg',
                 nextItemsIndicator: false,
                 nextItemsIndicatorLabel: $t('Showing %c from %t products'),
                 autoFetchNext: true,
@@ -35,18 +42,14 @@ define([
                 itemSelector: '.cs-grid-layout__brick:not(.cs-grid-layout__brick--teaser)',
                 containerSelector: '.products.list.items',
                 toolbarPaginationSelector: '.cs-toolbar__item--pagination',
-                areaClassName: 'cs-infinite-scroll__area',
-                buttonTriggerClassName: 'cs-infinite-scroll__button',
                 productTileTriggerClassName: 'cs-infinite-scroll__brick',
-                triggerLabelClassName: 'cs-infinite-scroll__label',
-                indicatorClassName: 'cs-infinite-scroll__indicator',
-                loadingClassName: 'cs-infinite-scroll--loading',
-                loadingSuffix: '--loading'
             },
             items: {
                 size: 0,
                 pageSize: 0,
-                curPage: 0
+                curPage: 0,
+                lowestPage: 1,
+                highestPage: 1,
             }
         },
         DIRECTIONS: {
@@ -67,11 +70,9 @@ define([
         loadedItems: null,
         observer: null,
         autoFetchCount: 0,
-        uiElements: [],
+        interactionElements: [],
         $container: null,
         toolbarElement: null,
-        lowestPage: 1,
-        highestPage: 1,
 
         _create: function () {
             if (this.options.items.size === 0) {
@@ -79,10 +80,28 @@ define([
             }
 
             this._parseOptions();
-            this.lowestPage = this.highestPage = this.options.items.curPage;
+            this.options.items.lowestPage = this.options.items.highestPage = this.options.items.curPage;
             this.$container = $(this.options.infinite.containerSelector);
             this.current_href = window.location.href;
             this.$toolbarElement = $(this.options.infinite.toolbarPaginationSelector);
+
+            this._attachEventListeners();
+        },
+
+        /**
+         * @inheritDoc
+         * @private
+         */
+        _init: function () {
+            this._super();
+
+            /**
+             * Scrolls page to last visited tile
+             */
+            if (history.state && history.state.scrollTo) {
+                history.scrollRestoration = 'manual';
+                document.querySelector(`a[href="${history.state.scrollTo}"]`).scrollIntoView();
+            }
 
             if (this.options.infinite.mediaBreakpoint) {
                 mediaCheck({
@@ -99,6 +118,16 @@ define([
             }
         },
 
+        _attachEventListeners: function () {
+            /**
+             * Saves last clicked item link in history.state
+             */
+            $('body').on('click', this.options.infinite.itemSelector, function(event)  {
+                const href = $(event.currentTarget).find('a').attr('href');
+                history.replaceState({scrollTo: href}, document.title, this.current_href);
+            });
+        },
+
         /**
          * Turns on/off infinite scroll
          * @param status{boolean}
@@ -110,16 +139,16 @@ define([
                     this._initIntersectionObserver();
                 }
 
-                if (this.uiElements.length) {
+                if (this.interactionElements.length) {
                     this._toggleVisibility(true);
                     this._addListeners();
                 } else {
-                    this._initUiElements();
+                    this._initInteractionElements();
                 }
 
                 this.$toolbarElement.hide();
             } else {
-                if (this.uiElements.length) {
+                if (this.interactionElements.length) {
                     this._toggleVisibility(false);
                     this._removeListeners();
                 }
@@ -148,14 +177,14 @@ define([
         },
 
         /**
-         * Sets loading indicators in ui elements
+         * Sets loading indicators in InteractionElements
          * @param isLoading {boolean}
          * @param direction {string}
          * @private
          */
         _setLoading: function (isLoading, direction) {
-            if (this.uiElements.length) {
-                this.uiElements.forEach(element => {
+            if (this.interactionElements.length) {
+                this.interactionElements.forEach(element => {
                     if (element.direction === direction) {
                         element.setLoading(isLoading);
                     }
@@ -164,34 +193,32 @@ define([
         },
 
         /**
-         * Sets ui elements visibility.
-         * If direction is ommited all elments will be affected.
+         * Sets InteractionElements visibility.
+         * If direction is omitted all InteractionElementss will be affected.
          * @param isVisible {boolean}
-         * @param direction {string}
+         * @param direction {string | undefined}
          * @private
          */
         _toggleVisibility: function (isVisible, direction) {
-            if (this.uiElements.length) {
-                this.uiElements.forEach(element => {
-                    if (typeof direction === 'undefined' || element.direction === direction) {
-                        element.toggleVisibility(isVisible);
+            if (this.interactionElements.length) {
+                this.interactionElements.forEach(interactionElement => {
+                    if (typeof direction === 'undefined' || interactionElement.direction === direction) {
+                        interactionElement.toggleVisibility(isVisible);
                     }
                 })
             }
         },
 
         /**
-         * Updates ui elements (in most cases updates urls).
+         * Updates InteractionElements (in most cases updates urls).
          * @param url
          * @param direction
          * @private
          */
-        _updateUiElement: function (url, direction) {
-            if (this.uiElements.length) {
-                this.uiElements.forEach(element => {
-                    if (element.direction === direction) {
-                        element.update(url);
-                    }
+        _updateInteractionElement: function (url, direction) {
+            if (this.interactionElements.length) {
+                this.interactionElements.forEach(interactionElement => {
+                    interactionElement.update(url, direction);
                 })
             }
         },
@@ -203,45 +230,45 @@ define([
          * @private
          */
         _addListeners: function (direction) {
-            if (this.uiElements.length) {
-                this.uiElements.forEach(element => {
+            if (this.interactionElements.length) {
+                this.interactionElements.forEach(interactionElement => {
                     if (typeof direction === 'undefined') {
-                        element.addListeners();
-                    } else if (element.direction === direction) {
-                        element.addListeners();
+                        interactionElement.addListeners();
+                    } else if (interactionElement.direction === direction) {
+                        interactionElement.addListeners();
                     }
                 })
             }
         },
 
         /**
-         * Detaches ui elements listeners.
-         * If direction is ommited all elments will be affected.
+         * Detaches InteractionElements listeners.
+         * If direction is omitted all elements will be affected.
          * @param direction
          * @private
          */
         _removeListeners: function (direction) {
-            if (this.uiElements.length) {
-                this.uiElements.forEach(element => {
+            if (this.interactionElements.length) {
+                this.interactionElements.forEach(interactionElement => {
                     if (typeof direction === 'undefined') {
-                        element.removeListeners();
-                    } else if (element.direction === direction) {
-                        element.removeListeners();
+                        interactionElement.removeListeners();
+                    } else if (interactionElement.direction === direction) {
+                        interactionElement.removeListeners();
                     }
                 })
             }
         },
 
         /**
-         * Removes HTML element & ui element itself. Direction is required.
+         * Removes HTML element & element itself. Direction is required.
          * @param direction
          * @private
          */
-        _removeElement: function (direction) {
-            if (this.uiElements.length && direction) {
-                this.uiElements = this.uiElements.filter((uiElement) => {
-                    if (uiElement.direction === direction) {
-                        return uiElement.remove();
+        _removeInteractionElements: function (direction) {
+            if (this.interactionElements.length && direction) {
+                this.interactionElements = this.interactionElements.filter((interactionElement) => {
+                    if (interactionElement.direction === direction) {
+                        return interactionElement.remove();
                     } else {
                         return true
                     }
@@ -250,7 +277,7 @@ define([
         },
 
         /**
-         * Initializes Intersection Obeserver
+         * Initializes Intersection Observer
          * @private
          */
         _initIntersectionObserver: function () {
@@ -289,22 +316,26 @@ define([
 
         /**
          * Creates observers & triggers based on this.options.infinite configuration.
-         * Elements are saved in this.uiElements array.
+         * InteractionElements are saved in this.interactionElements array.
          * @private
          */
-        _initUiElements: function () {
+        _initInteractionElements: function () {
             // Prev
-            if (this.lowestPage > 1) {
+            if (this.options.items.lowestPage > 1) {
                 const prevUrl = this._buildUrl(this.current_href, 'p', parseInt(this.options.items.curPage) - 1);
 
                 // Trigger
                 if (this.options.infinite.triggerPrevType !== this.TRIGGER_TYPES.none) {
-                    const prevTriggerElement = this._createTrigger({
+                    const prevTriggerElement = new InteractionElement({
                         url: prevUrl,
                         caption: this.options.infinite.triggerPrevLabel,
+                        type: this.options.infinite.triggerPrevType,
                         direction: this.DIRECTIONS.prev,
-                        type: this.options.infinite.triggerPrevType
-                    });
+                        loadingCaption: this.options.infinite.loadingTriggerLabel,
+                        clickHandler: this._clickHandler.bind(this),
+                        pageData: this.options.items,
+                        arrow: this.options.infinite.triggerButtonArrowUrl ? require.toUrl(this.options.infinite.triggerButtonArrowUrl) : null
+                    }, buttonTpl);
 
                     if (this.options.infinite.triggerPrevType === this.TRIGGER_TYPES.button) {
                         this.$container.before(prevTriggerElement.element);
@@ -314,7 +345,7 @@ define([
                         this.$container.before(prevTriggerElement.element);
                     }
 
-                    this.uiElements.push(prevTriggerElement);
+                    this.interactionElements.push(prevTriggerElement);
                 }
             }
 
@@ -324,32 +355,47 @@ define([
 
                 // Indicator
                 if (this.options.infinite.nextItemsIndicator && this.options.infinite.nextItemsIndicatorLabel !== '') {
-                    const nextItemsIndicatorElement = this._createIndicatorElement({
+                    const nextItemsIndicatorElement = new InteractionElement({
+                        url: nextUrl,
                         caption: this.options.infinite.nextItemsIndicatorLabel,
-                        direction: this.DIRECTIONS.next
-                    });
+                        type: 'indicator',
+                        direction: this.DIRECTIONS.next,
+                        loadingCaption: this.options.infinite.loadingTriggerLabel,
+                        pageData: this.options.items,
+                        shouldNotBeRemoved: true
+                    }, indicatorTpl)
                     this.$container.after(nextItemsIndicatorElement.element);
-                    this.uiElements.push(nextItemsIndicatorElement);
+                    this.interactionElements.push(nextItemsIndicatorElement);
                 }
 
                 // Observer area
                 if (this.options.infinite.autoFetchNext) {
-                    const nextObserverElement = this._createObserverArea({
+                    const nextObserverElement = new InteractionElement({
                         url: nextUrl,
-                        direction: this.DIRECTIONS.next
-                    });
-                    this.uiElements.push(nextObserverElement)
+                        type: 'observer',
+                        direction: this.DIRECTIONS.next,
+                        observer: this.observer,
+                        pageData: this.options.items
+                    }, observableAreaTpl)
+                    this.interactionElements.push(nextObserverElement)
                     this.$container.after(nextObserverElement.element);
                 }
 
                 // Trigger
                 if (this.options.infinite.triggerNextType !== this.TRIGGER_TYPES.none) {
-                    const nextTriggerElement = this._createTrigger({
+                    const nextTriggerElement = new InteractionElement({
                         url: nextUrl,
                         caption: this.options.infinite.triggerNextLabel,
+                        type: this.options.infinite.triggerNextType,
                         direction: this.DIRECTIONS.next,
-                        type: this.options.infinite.triggerNextType
-                    });
+                        loadingCaption: this.options.infinite.loadingTriggerLabel,
+                        clickHandler: this._clickHandler.bind(this),
+                        pageData: this.options.items,
+                        arrow: this.options.infinite.triggerButtonArrowUrl ? require.toUrl(this.options.infinite.triggerButtonArrowUrl) : null,
+                        img: this.options.infinite.triggerNextType === this.TRIGGER_TYPES.productTile ?
+                            document.querySelector(this.options.infinite.itemSelector + ' .cs-product-tile__image img').src :
+                            null
+                    }, this.options.infinite.triggerNextType === this.TRIGGER_TYPES.button ? buttonTpl : productTileTpl)
 
                     if (this.options.infinite.triggerNextType === this.TRIGGER_TYPES.button) {
                         this.$container.after(nextTriggerElement.element);
@@ -359,7 +405,7 @@ define([
                         this.$container.append(nextTriggerElement.element);
                     }
 
-                    this.uiElements.push(nextTriggerElement);
+                    this.interactionElements.push(nextTriggerElement);
                 }
             }
 
@@ -367,303 +413,24 @@ define([
         },
 
         /**
-         * @param url
-         * @param caption
-         * @param direction
-         * @returns {ObserverArea}
-         * @private
+         * Updates links & manages visibility of InteractionElements
          */
-        _createObserverArea: function ({url, direction}) {
-            const self = this;
-
-            function ObserverArea() {
-                this.element = document.createElement('div');
-                this._label = document.createElement('span');
-                this._loadingClass = self.options.infinite.areaClassName + self.options.infinite.loadingSuffix;
-                this.direction = direction;
-                this._caption = '';
-                this._loadingLabel = '';
-
-                this.element.classList.add(self.options.infinite.areaClassName, `${self.options.infinite.areaClassName}--${direction}`);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataUrl, url);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataDirection, direction);
-                this._label.innerText - this._caption;
-                this.element.appendChild(this._label);
-            }
-
-            Object.assign(ObserverArea.prototype, self._getCommonUiProto(), self._getAreaProto());
-            return new ObserverArea();
-        },
-
-        /**
-         * Creates trigger element (button or product tile).
-         * @param url
-         * @param caption
-         * @param direction
-         * @param type
-         * @returns {Button|ProductTile}
-         * @private
-         */
-        _createTrigger: function ({url, caption, direction, type}) {
-            if (type === this.TRIGGER_TYPES.button) {
-                return this._createButtonTrigger({url, caption, direction});
-            }
-
-            if (type === this.TRIGGER_TYPES.productTile) {
-                return this._createProductTileTrigger({url, caption, direction})
-            }
-        },
-
-        /**
-         * Creates indicator element (it's just caption, has no actions).
-         * @param caption
-         * @param direction
-         * @returns {IndicatorElement}
-         * @private
-         */
-        _createIndicatorElement: function ({caption, direction}) {
-            const self = this;
-
-            function IndicatorElement() {
-                this.element = document.createElement('div');
-                this._label = document.createElement('span');
-                this._loadingClass = self.options.infinite.indicatorClassName + self.options.infinite.loadingSuffix;
-                this.direction = direction;
-                this._caption = caption;
-
-                this.element.classList.add(self.options.infinite.indicatorClassName, `${self.options.infinite.indicatorClassName}--${direction}`);
-                this._label.innerText = self._getCaption(this._caption);
-                this.element.appendChild(this._label);
-
-                this.addListeners = function () {};
-                this.removeListeners = function () {};
-                this.setUrl = function () {};
-                this.remove = function () {
-                    this.update();
-                    return true;
-                }
-                this.update = function () { this._label.innerText = self._getCaption(this._caption); }
-            }
-
-            Object.assign(IndicatorElement.prototype, self._getCommonUiProto());
-            return new IndicatorElement();
-        },
-
-        /**
-         * Returns common ui elements prototype methods.
-         * @returns {{toggleVisibility: toggleVisibility, setUrl: setUrl}}
-         * @private
-         */
-        _getCommonUiProto: function () {
-            const self = this;
-
-            return {
-                _loadingLabel: self.options.infinite.loadingTriggerLabel,
-                toggleVisibility: function (isVisible) {
-                    this.element.style.display = isVisible ? null : 'none';
-                },
-                setLoading: function (isLoading) {
-                    if (isLoading) {
-                        this._label.innerText = this._loadingLabel;
-                        this.element.classList.add(this._loadingClass);
-                    } else {
-                        this._label.innerText = self._getCaption(this._caption);
-                        this.element.classList.remove(this._loadingClass);
-                    }
-                },
-                remove: function () {
-                    this.element.remove();
-                    return false;
-                },
-                update: function (url) {
-                    this.element.setAttribute(self.DATA_ATTRIBUTES.dataUrl, url);
-                    this._label.innerText = self._getCaption(this._caption);
-                }
-            }
-        },
-
-        /**
-         * Returns trigger-type (button, product tile) ui elements prototype methods.
-         * @returns {{removeListeners: removeListeners, _loadingLabel, setLoading: setLoading, addListeners: addListeners}}
-         * @private
-         */
-        _getTriggerProto: function () {
-            const self = this;
-
-            return {
-                addListeners: function () {
-                    $(this.element).on('click', self._clickHandler.bind(self))
-                },
-                removeListeners: function () {
-                    $(this.element).off('click', self._clickHandler.bind(self))
-                }
-            }
-        },
-
-        /**
-         * Returns intersection observer element prototype methods.
-         * @returns {{removeListeners: removeListeners, setLoading: setLoading, addListeners: addListeners}}
-         * @private
-         */
-        _getAreaProto: function () {
-            const self = this;
-
-            return {
-                addListeners: function () {
-                    self.observer.observe(this.element);
-                },
-                removeListeners: function () {
-                    try {
-                        self.observer.unobserve(this.element);
-                    } catch (e) {}
-                }
-            }
-        },
-
-        /**
-         * Helper method for _createTrigger.
-         * @param url
-         * @param caption
-         * @param direction
-         * @returns {Button}
-         * @private
-         */
-        _createButtonTrigger: function ({url, caption, direction}) {
-            const self = this;
-
-            function Button() {
-                this.element = document.createElement('button');
-                this._label = document.createElement('span');
-                this._caption = caption;
-                this._loadingClass = self.options.infinite.buttonTriggerClassName + self.options.infinite.loadingSuffix;
-                this.direction = direction;
-
-                this.element.classList.add(self.options.infinite.buttonTriggerClassName, `${self.options.infinite.buttonTriggerClassName}--${direction}`);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataUrl, url);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataDirection, direction);
-                this._label.classList.add(self.options.infinite.triggerLabelClassName);
-                this._label.innerText = self._getCaption(this._caption);
-                this.element.appendChild(this._label);
-            }
-
-            Object.assign(Button.prototype, self._getCommonUiProto(), self._getTriggerProto());
-            return new Button();
-        },
-
-        /**
-         * Helper method for _createTrigger.
-         * @param url
-         * @param caption
-         * @param direction
-         * @returns {ProductTile|Button}
-         * @private
-         */
-        _createProductTileTrigger: function ({url, caption, direction}) {
-            const self = this;
-
-            function ProductTile() {
-                // Clone real product tile
-                const existingProductTile = document.querySelector(self.options.infinite.itemSelector);
-
-                if (!existingProductTile) {
-                    return this._createButtonTrigger({url, caption, direction})
-                }
-
-                this.element = existingProductTile.cloneNode(true);
-                this._caption = caption
-                this._loadingClass = self.options.infinite.productTileTriggerClassName + self.options.infinite.loadingSuffix;
-                this.direction = direction;
-
-                // Remove links
-                const elementsWithLink = this.element.querySelectorAll('[href]');
-
-                if (elementsWithLink.length) {
-                    elementsWithLink.forEach((elementWithLink) => elementWithLink.removeAttribute('href'))
-                }
-
-                // Remove hover effects
-                const elementsWithHover = this.element.querySelectorAll('[class*="hover"]');
-                if (elementsWithHover.length) {
-                    elementsWithHover.forEach((elementWithHover) => elementWithHover.remove());
-                }
-
-                // Set attributes
-                this.element.classList.add(self.options.infinite.productTileTriggerClassName);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataUrl, url);
-                this.element.setAttribute(self.DATA_ATTRIBUTES.dataDirection, direction);
-
-                // Create overlay with caption
-                const productTileOverlay = document.createElement('div');
-                this._label = document.createElement('span');
-
-                productTileOverlay.classList.add('cs-infinite-scroll__product-tile-overlay');
-                this._label.classList.add(self.options.infinite.triggerLabelClassName);
-                this._label.innerText = self._getCaption(this._caption);
-                productTileOverlay.appendChild(this._label);
-                this.element.firstChild.nextElementSibling.appendChild(productTileOverlay);
-            }
-
-            Object.assign(ProductTile.prototype, self._getCommonUiProto(), self._getTriggerProto());
-            return new ProductTile();
-        },
-
-        /**
-         * Returns formatted caption. Ui elments can have labels with variables:
-         * %c - current qty of fetched items,
-         * %t - total qty,
-         * %p - previous items qty,
-         * %n - next items qty.
-         * @param caption
-         * @returns {*|string}
-         * @private
-         */
-        _getCaption: function (caption) {
-            if (typeof caption !== 'string') {
-                return caption;
-            }
-
-            let result = caption;
-
-            if (result.includes('%c')) {
-                let nextProducts = this.options.items.size - this.options.items.curPage * this.options.items.pageSize;
-                nextProducts = nextProducts >= 0 ? nextProducts : 0;
-                result = result.replace('%c', this.options.items.size - ((this.lowestPage - 1) * this.options.items.pageSize) - nextProducts);
-            }
-
-            if (result.includes('%t')) {
-                result = result.replace('%t', this.options.items.size);
-            }
-
-            if (result.includes('%p')) {
-                result = result.replace('%p', ((this.lowestPage - 1) * this.options.items.pageSize));
-            }
-
-            if (result.includes('%n')) {
-                result = result.replace('%n', (this.options.items.size - this.options.items.curPage * this.options.items.pageSize));
-            }
-
-            return result;
-        },
-
-        /**
-         * Updates links & manages visibility of UI elements
-         */
-        _updateUiElements: function (direction) {
+        _updateInteractionElements: function (direction) {
             if (direction === this.DIRECTIONS.prev) {
-                if (this.lowestPage > 1) {
-                    const prevUrl = this._buildUrl(this.current_href, 'p', parseInt(this.lowestPage) - 1);
+                if (this.options.items.lowestPage > 1) {
+                    const prevUrl = this._buildUrl(this.current_href, 'p', parseInt(this.options.items.lowestPage) - 1);
                     this._setLoading(false, direction);
-                    this._updateUiElement(prevUrl, direction);
+                    this._updateInteractionElement(prevUrl, direction);
                 } else {
-                    this._removeElement(direction);
+                    this._removeInteractionElements(direction);
                 }
             } else {
                 if (this.options.items.size > this.options.items.curPage * this.options.items.pageSize) {
-                    const nextUrl = this._buildUrl(this.current_href, 'p', parseInt(this.highestPage) + 1);
+                    const nextUrl = this._buildUrl(this.current_href, 'p', parseInt(this.options.items.highestPage) + 1);
                     this._setLoading(false, direction);
-                    this._updateUiElement(nextUrl, direction);
+                    this._updateInteractionElement(nextUrl, direction);
                 } else {
-                    this._removeElement(direction);
+                    this._removeInteractionElements(direction);
                 }
             }
         },
@@ -696,7 +463,7 @@ define([
         },
 
         /**
-         * Appends fetched elements and updates page status.
+         * Appends fetched product tiles and updates page status.
          * @param response
          * @param newUrl
          * @private
@@ -714,13 +481,13 @@ define([
                 } else {
                     $(this.options.infinite.containerSelector).append(responseDom.find(this.options.infinite.containerSelector).html());
                 }
-                this.highestPage = response.curPage;
+                this.options.items.highestPage = response.curPage;
 
                 directionToUpdate = this.DIRECTIONS.next;
                 // Prev page
             } else {
                 $(this.options.infinite.containerSelector).prepend(responseDom.find(this.options.infinite.containerSelector).html());
-                this.lowestPage = response.curPage;
+                this.options.items.lowestPage = response.curPage;
                 directionToUpdate = this.DIRECTIONS.prev;
             }
 
@@ -728,7 +495,7 @@ define([
             self.options.items.pageSize = response.pageSize;
             self.options.items.curPage = response.curPage;
             $(document).trigger('contentUpdated');
-            self._updateUiElements(directionToUpdate)
+            self._updateInteractionElements(directionToUpdate);
         },
 
         /**
@@ -750,5 +517,5 @@ define([
             }
         },
     });
-    return $.mgs.infniteScroll;
+    return $.mgs.elasticsuiteInfiniteScroll;
 });
