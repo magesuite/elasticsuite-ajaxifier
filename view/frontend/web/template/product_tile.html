@@ -1,0 +1,36 @@
+<li class="cs-grid-layout__brick cs-infinite-scroll__brick" data-url="<%= data.url %>" data-direction="<%= data.direction %>">
+    <div class="cs-product-tile cs-product-tile--grid">
+        <div class="cs-product-tile__container">
+            <div class="cs-product-tile__thumbnail">
+                <a class="cs-product-tile__thumbnail-link product-item-photo">
+                    <figure class="cs-product-tile__figure">
+                        <picture class="cs-product-tile__image">
+                            <img src="<%= data.img %>" class="cs-product-tile__img" alt="<%= data.direction %>" loading="lazy">
+                        </picture>
+                    </figure>
+                </a>
+            </div>
+            <div class="cs-product-tile__content">
+                <div class="cs-product-tile__main product-item-details">
+                    <div class="cs-product-tile__price product-info-price">
+                        <div class="price-box price-final_price">
+                            <div class="price-box">
+                                <p class="minimal-price">
+                                    <span class="price-container tax weee">
+                                        <span class="price-wrapper"><span class="price"><%= data.direction %></span></span>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cs-product-tile__name">
+                        <a class="cs-product-tile__name-link product-item-link"><%= data.direction %></a>
+                    </div>
+                    <div class="cs-product-tile__description"></div>
+                    <span class="cs-product-tile__stock cs-product-tile__stock--in">In stock</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cs-infinite-scroll__product-tile-overlay"><span data-role="label"></span></div>
+</li>

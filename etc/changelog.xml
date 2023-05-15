@@ -18,6 +18,12 @@
                     </description>
                 </entry>
             </tag>
+            <tag version="1.1.0" date="2023-05-15">
+                <entry>
+                    <type>feat</type>
+                    <overview>Scroll restoration introduced. UiElements refactor.</overview>
+                </entry>
+            </tag>
         </changelog>
     </module>
 </config>
