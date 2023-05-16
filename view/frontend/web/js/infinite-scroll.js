@@ -122,7 +122,7 @@ define([
             /**
              * Saves last clicked item link in history.state
              */
-            $('body').on('click', this.options.infinite.itemSelector, function(event)  {
+            $(this.options.infinite.containerSelector).on('click', this.options.infinite.itemSelector, function(event)  {
                 const href = $(event.currentTarget).find('a').attr('href');
                 history.replaceState({scrollTo: href}, document.title, this.current_href);
             });
