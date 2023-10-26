@@ -43,6 +43,7 @@ define([
                 containerSelector: '.products.list.items',
                 toolbarPaginationSelector: '.cs-toolbar__item--pagination',
                 productTileTriggerClassName: 'cs-infinite-scroll__brick',
+                backScrollYOffset: 0,
             },
             items: {
                 size: 0,
@@ -100,7 +101,16 @@ define([
              */
             if (history.state && history.state.scrollTo) {
                 history.scrollRestoration = 'manual';
-                document.querySelector(`a[href="${history.state.scrollTo}"]`).scrollIntoView();
+
+                const yOffset = this.options.infinite.backScrollYOffset; 
+
+                if (yOffset > 0) {
+                    const element = document.querySelector(`a[href="${history.state.scrollTo}"]`);
+                    const y = element.getBoundingClientRect().top + window.scrollY - yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                } else {
+                    document.querySelector(`a[href="${history.state.scrollTo}"]`).scrollIntoView();
+                }
             }
 
             if (this.options.infinite.mediaBreakpoint) {
@@ -166,6 +176,7 @@ define([
             this.options.infinite.autoFetchPrev = parseInt(this.options.infinite.autoFetchPrev);
             this.options.infinite.autoFetchNext = parseInt(this.options.infinite.autoFetchNext);
             this.options.infinite.autoFetchLimit = parseInt(this.options.infinite.autoFetchLimit);
+            this.options.infinite.backScrollYOffset = parseInt(this.options.infinite.backScrollYOffset );
 
             if (this.options.infinite.autoFetchLimit === 0) {
                 this.options.infinite.autoFetchLimit = Infinity

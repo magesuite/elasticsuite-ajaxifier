@@ -134,6 +134,13 @@
                     </depends>
                     <comment>When enabled hides image teasers in content loaded by the infinity scroll</comment>
                 </field>
+                <field id="back_scroll_y_offset" translate="label comment" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tile scroll Y offset</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment>Y offset for product tile used when returning from PDP to POP (should take into account f.e. sticky header)</comment>
+                </field>
             </group>
         </section>
     </system>
