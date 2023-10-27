@@ -22,6 +22,7 @@ class Configuration
     public const XML_PATH_INFINITE_SCROLL_TOOLBAR_SELECTOR = 'ajaxifier/infinite_scroll/toolbar_selector';
     public const XML_PATH_INFINITE_SCROLL_OBSERVER_THRESHOLD = 'ajaxifier/infinite_scroll/observer_threshold';
     public const XML_PATH_INFINITE_SCROLL_HIDE_TEASERS = 'ajaxifier/infinite_scroll/hide_teasers';
+    public const XML_PATH_INFINITE_BACK_SCROLL_Y_OFFSET = 'ajaxifier/infinite_scroll/back_scroll_y_offset';
 
     protected \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig;
 
@@ -65,7 +66,8 @@ class Configuration
             'itemSelector' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_ITEM_SELECTOR),
             'containerSelector' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_CONTAINER_SELECTOR),
             'toolbarPaginationSelector' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_TOOLBAR_SELECTOR),
-            'observerThreshold' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_OBSERVER_THRESHOLD)
+            'observerThreshold' => $this->getValue(self::XML_PATH_INFINITE_SCROLL_OBSERVER_THRESHOLD),
+            'backScrollYOffset' => $this->getValue(self::XML_PATH_INFINITE_BACK_SCROLL_Y_OFFSET)
         ];
     }
 

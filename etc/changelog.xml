@@ -30,6 +30,13 @@
                     <overview>Scroll restoration: higher event listener priority.</overview>
                 </entry>
             </tag>
+            <tag version="1.1.2" date="2023-10-26">
+                <entry>
+                    <type>FIX</type>
+                    <overview>Add optional scroll Y offset for layout with sticky elements.</overview>
+                    <ticket_id>NPW-103</ticket_id>
+                </entry>
+            </tag>
         </changelog>
     </module>
 </config>
