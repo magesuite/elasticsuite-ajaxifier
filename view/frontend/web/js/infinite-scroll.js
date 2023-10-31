@@ -86,6 +86,8 @@ define([
             this.current_href = window.location.href;
             this.$toolbarElement = $(this.options.infinite.toolbarPaginationSelector);
 
+            debugger;
+
             this._attachEventListeners();
         },
 
@@ -95,6 +97,10 @@ define([
          */
         _init: function () {
             this._super();
+
+            if (this.options.items.size === 0) {
+                return;
+            }
 
             /**
              * Scrolls page to last visited tile
