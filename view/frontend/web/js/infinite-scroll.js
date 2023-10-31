@@ -86,8 +86,6 @@ define([
             this.current_href = window.location.href;
             this.$toolbarElement = $(this.options.infinite.toolbarPaginationSelector);
 
-            debugger;
-
             this._attachEventListeners();
         },
 
