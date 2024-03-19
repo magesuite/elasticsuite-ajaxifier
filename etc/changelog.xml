@@ -51,6 +51,13 @@
                     <ticket_id>NPW-115</ticket_id>
                 </entry>
             </tag>
+            <tag version="1.1.6" date="2023-03-19">
+                <entry>
+                    <type>FIX</type>
+                    <overview>Change contentUpdated event target to body element.</overview>
+                    <ticket_id>EMT-162</ticket_id>
+                </entry>
+            </tag>
         </changelog>
     </module>
 </config>
