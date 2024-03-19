@@ -509,7 +509,7 @@ define([
             self.options.items.size = response.size;
             self.options.items.pageSize = response.pageSize;
             self.options.items.curPage = response.curPage;
-            $(document).trigger('contentUpdated');
+            $('body').trigger('contentUpdated');
             self._updateInteractionElements(directionToUpdate);
         },
 
