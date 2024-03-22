@@ -74,6 +74,7 @@ define([
         interactionElements: [],
         $container: null,
         toolbarElement: null,
+        restoreScrollAfterLoad: false,
 
         _create: function () {
             if (this.options.items.size === 0) {
@@ -326,6 +327,7 @@ define([
             const direction = currentTarget.getAttribute(this.DATA_ATTRIBUTES.dataDirection);
 
             this._setLoading(true, direction);
+            this.restoreScrollAfterLoad = true;
             this._loadPage(currentTarget.getAttribute(this.DATA_ATTRIBUTES.dataUrl));
         },
 
@@ -487,6 +489,7 @@ define([
             const self = this;
             history.pushState({}, document.title, newUrl);
             const responseDom = $($.parseHTML(response.productList));
+            const scrollTop = window.scrollY;
             let directionToUpdate;
 
             // Next page
@@ -506,6 +509,10 @@ define([
                 directionToUpdate = this.DIRECTIONS.prev;
             }
 
+            if (this.restoreScrollAfterLoad) {
+                window.scrollTo({top: scrollTop});
+                this.restoreScrollAfterLoad = false;
+            }
             self.options.items.size = response.size;
             self.options.items.pageSize = response.pageSize;
             self.options.items.curPage = response.curPage;
