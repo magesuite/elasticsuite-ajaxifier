@@ -6,9 +6,9 @@ $curPage = $viewModel->getCurrentPage();
 $maxNumberOfPages = $viewModel->getMaxNumberOfPages();
 $url = $viewModel->getCurrentUrl();
 ?>
-<?php if ($curPage > 1): ?>
+<?php if ($curPage > 1) : ?>
     <link rel='prev' href='<?= $url ?>?p=<?= $curPage - 1 ?>' />
 <?php endif ?>
-<?php if ($curPage < $maxNumberOfPages): ?>
+<?php if ($curPage < $maxNumberOfPages) : ?>
     <link rel='next' href='<?= $url ?>?p=<?= $curPage + 1 ?>' />
 <?php endif ?>
