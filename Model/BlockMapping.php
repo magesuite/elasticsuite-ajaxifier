@@ -40,6 +40,7 @@ class BlockMapping
             }
         }
 
+        // phpcs:ignore Magento2.Exceptions.DirectThrow.FoundDirectThrow
         throw new \Exception(
             "Product block not found for given full action name. Make sure, that it's mapped in di.xml"
         );
@@ -58,6 +59,7 @@ class BlockMapping
             }
         }
 
+        // phpcs:ignore Magento2.Exceptions.DirectThrow.FoundDirectThrow
         throw new \Exception(
             "Navigation block not found for given full action name. Make sure, that it's mapped in di.xml"
         );
