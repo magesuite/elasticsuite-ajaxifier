@@ -3,12 +3,13 @@ define([
     'matchMedia',
     'mage/translate',
     'mage/url',
+    'mage/cookies',
     'mgsElasticsuiteInteractionElement',
     'text!MageSuite_ElasticsuiteAjaxifier/template/button.html',
     'text!MageSuite_ElasticsuiteAjaxifier/template/indicator.html',
     'text!MageSuite_ElasticsuiteAjaxifier/template/observable_area.html',
     'text!MageSuite_ElasticsuiteAjaxifier/template/product_tile.html'
-], function ($, mediaCheck, $t, url, InteractionElement, buttonTpl, indicatorTpl, observableAreaTpl, productTileTpl) {
+], function ($, mediaCheck, $t, url, cookies, InteractionElement, buttonTpl, indicatorTpl, observableAreaTpl, productTileTpl) {
     'use strict';
 
     /**
@@ -107,7 +108,7 @@ define([
             if (history.state && history.state.scrollTo) {
                 history.scrollRestoration = 'manual';
 
-                const yOffset = this.options.infinite.backScrollYOffset; 
+                const yOffset = this.options.infinite.backScrollYOffset;
 
                 if (yOffset > 0) {
                     const element = document.querySelector(`a[href="${history.state.scrollTo}"]`);
@@ -516,7 +517,13 @@ define([
             self.options.items.size = response.size;
             self.options.items.pageSize = response.pageSize;
             self.options.items.curPage = response.curPage;
-            $('body').trigger('contentUpdated');
+
+            // Initialize components for new products:
+            $(this.options.infinite.containerSelector)
+                .trigger('contentUpdated')
+                .find('input[name="form_key"]')
+                .val($.mage.cookies.get('form_key'));
+
             self._updateInteractionElements(directionToUpdate);
         },
 
