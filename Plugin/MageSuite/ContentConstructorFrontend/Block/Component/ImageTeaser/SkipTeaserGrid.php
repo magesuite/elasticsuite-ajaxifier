@@ -10,8 +10,8 @@ class SkipTeaserGrid
     protected \Magento\Framework\App\RequestInterface $request;
 
     public function __construct(
-      \MageSuite\ElasticsuiteAjaxifier\Helper\Configuration $configuration,
-      \Magento\Framework\App\RequestInterface $request
+        \MageSuite\ElasticsuiteAjaxifier\Helper\Configuration $configuration,
+        \Magento\Framework\App\RequestInterface $request
     ) {
         $this->configuration = $configuration;
         $this->request = $request;
@@ -23,8 +23,7 @@ class SkipTeaserGrid
         $key = '',
         $index = null
     ) {
-        if (
-            !$this->configuration->isModuleEnabled() ||
+        if (!$this->configuration->isModuleEnabled() ||
             !$this->configuration->isInfiniteScrollEnabled() ||
             !$this->configuration->isTeaserHidingEnabled() ||
             !$this->request->getParam('ajax') ||

@@ -21,8 +21,7 @@ class SkipTeaserSlides
         \MageSuite\ContentConstructorFrontend\Model\Component\ImageTeaser $subject,
         callable $proceed
     ): array {
-        if (
-            !$this->configuration->isModuleEnabled() ||
+        if (!$this->configuration->isModuleEnabled() ||
             !$this->configuration->isInfiniteScrollEnabled() ||
             !$this->configuration->isTeaserHidingEnabled() ||
             !$this->request->getParam('ajax')
