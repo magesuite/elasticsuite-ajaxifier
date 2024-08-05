@@ -23,47 +23,31 @@
                 </field>
                 <field id="media_breakpoint" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Media breakpoint</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[Determines when infinite scroll should start.<br>E.g. (max-width: 768px). If 0, infinite scroll will work on all resolutions.]]></comment>
                 </field>
                 <field id="trigger_prev_type" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Trigger previous type</label>
                     <source_model>MageSuite\ElasticsuiteAjaxifier\Model\Config\Source\TriggerTypePrev</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[How should "Fetch previous" button look like.]]></comment>
                 </field>
                 <field id="trigger_prev_label" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Trigger previous label</label>
                     <comment><![CDATA[You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
                     <depends>
-                        <field id="enabled">1</field>
                         <field id="trigger_prev_type">button</field>
                     </depends>
                 </field>
                 <field id="trigger_next_type" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Trigger next type</label>
                     <source_model>MageSuite\ElasticsuiteAjaxifier\Model\Config\Source\TriggerTypeNext</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[How should "Fetch more" button look like.]]></comment>
                 </field>
                 <field id="trigger_next_label" translate="label" type="text" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Trigger next label</label>
                     <comment><![CDATA[You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                 </field>
                 <field id="auto_fetch_next" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Auto fetch next</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Determines whether next products should be fetched automatically.]]></comment>
                 </field>
@@ -71,7 +55,6 @@
                     <label>Auto fetch limit</label>
                     <validate>required-entry validate-number validate-zero-or-greater</validate>
                     <depends>
-                        <field id="enabled">1</field>
                         <field id="auto_fetch_next">1</field>
                     </depends>
                     <comment><![CDATA[Determines maximum auto-fetch number. If 0, no limit.]]></comment>
@@ -80,16 +63,12 @@
                     <label>Observer threshold</label>
                     <validate>required-entry validate-number validate-zero-or-greater</validate>
                     <depends>
-                        <field id="enabled">1</field>
                         <field id="auto_fetch_next">1</field>
                     </depends>
                     <comment><![CDATA[Distance before the end of the listing, when autofetch should start.]]></comment>
                 </field>
                 <field id="next_items_indicator" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Show next items indicator</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Displays any text, if there are more products to fetch.]]></comment>
                 </field>
@@ -97,7 +76,6 @@
                     <label>Next items indicator label</label>
                     <validate>required-entry</validate>
                     <depends>
-                        <field id="enabled">1</field>
                         <field id="next_items_indicator">1</field>
                     </depends>
                     <comment><![CDATA[Text displayed when there are more products to fetch. e.g. <b>Showing %c of %t products</b>.<br>You can use variables: %c - current qty of fetched products, %t - total qty of fetched products, %p - previous products qty to load, %n - next products qty to load.]]></comment>
@@ -105,40 +83,25 @@
                 <field id="item_selector" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Item selector</label>
                     <validate>required-entry</validate>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[Product css selector e.g. <b>.cs-grid-layout__brick</b>]]></comment>
                 </field>
                 <field id="container_selector" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Container selector</label>
                     <validate>required-entry</validate>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[Products container css selector e.g. <b>.products.list.items</b>]]></comment>
                 </field>
                 <field id="toolbar_selector" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Toolbar selector</label>
                     <validate>required-entry</validate>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment><![CDATA[Toolbar css selector e.g. <b>.cs-toolbar__item--pagination</b>]]></comment>
                 </field>
                 <field id="hide_teasers" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Hide image teasers</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment>When enabled hides image teasers in content loaded by the infinity scroll</comment>
                 </field>
                 <field id="back_scroll_y_offset" translate="label comment" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Tile scroll Y offset</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                     <comment>Y offset for product tile used when returning from PDP to POP (should take into account f.e. sticky header)</comment>
                 </field>
             </group>
