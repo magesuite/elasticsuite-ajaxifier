@@ -30,7 +30,6 @@ class GettingAjaxResponseTest extends \Magento\TestFramework\TestCase\AbstractCo
      * @magentoAppArea frontend
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/categories.php
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/products.php
-     * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/full_reindex.php
      */
     public function testSearchPageReturnsCorrectResponse()
     {
@@ -58,9 +57,10 @@ class GettingAjaxResponseTest extends \Magento\TestFramework\TestCase\AbstractCo
 
     /**
      * @magentoAppArea frontend
+     * @magentoAppIsolation disabled
+     * @magentoDbIsolation disabled
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/categories.php
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/products.php
-     * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/full_reindex.php
      */
     public function testCategoryPageReturnsCorrectResponse()
     {
