@@ -44,6 +44,8 @@ define([
                 containerSelector: '.products.list.items',
                 toolbarPaginationSelector: '.cs-toolbar__item--pagination',
                 productTileTriggerClassName: 'cs-infinite-scroll__brick',
+                productTilePlaceholderClassName: 'cs-grid-layout__brick cs-infinite-scroll__brick',
+                productTilePlaceholderLoaderClassName: 'cs-product-tile cs-infinite-scroll__placeholder-loader test',
                 backScrollYOffset: 0,
             },
             items: {
@@ -76,6 +78,7 @@ define([
         $container: null,
         toolbarElement: null,
         restoreScrollAfterLoad: false,
+        pendingPlaceholders: [],
 
         _create: function () {
             if (this.options.items.size === 0) {
@@ -305,8 +308,10 @@ define([
                             const {target} = entry;
 
                             if (this.autoFetchCount < this.options.infinite.autoFetchLimit) {
-                                this._setLoading(true, target.getAttribute(this.DATA_ATTRIBUTES.dataDirection));
-                                this._loadPage(target.getAttribute(this.DATA_ATTRIBUTES.dataUrl));
+                                const direction = target.getAttribute(this.DATA_ATTRIBUTES.dataDirection);
+
+                                this._setLoading(true, direction);
+                                this._loadPage(target.getAttribute(this.DATA_ATTRIBUTES.dataUrl), direction);
                                 this.autoFetchCount++
                             } else {
                                 this.observer.unobserve(target);
@@ -329,7 +334,64 @@ define([
 
             this._setLoading(true, direction);
             this.restoreScrollAfterLoad = true;
-            this._loadPage(currentTarget.getAttribute(this.DATA_ATTRIBUTES.dataUrl));
+            this._loadPage(currentTarget.getAttribute(this.DATA_ATTRIBUTES.dataUrl), direction);
+        },
+
+        _reserveSpaceForNextPage: function () {
+            const itemsLeft = this.options.items.size - (this.options.items.highestPage * this.options.items.pageSize);
+            const placeholdersCount = Math.min(this.options.items.pageSize, Math.max(itemsLeft, 0));
+            const itemHeight = this._getPlaceholderItemHeight();
+
+            this._removePendingPlaceholders();
+
+            if (!placeholdersCount || !itemHeight) {
+                return;
+            }
+
+            for (let index = 0; index < placeholdersCount; index++) {
+                this.pendingPlaceholders.push(this._createPlaceholder(itemHeight));
+            }
+
+            const $triggerTile = this.$container.find(`.${this.options.infinite.productTileTriggerClassName}`).first();
+
+            if (this.options.infinite.triggerNextType === this.TRIGGER_TYPES.productTile && $triggerTile.length) {
+                $triggerTile.before(this.pendingPlaceholders);
+                return;
+            }
+
+            this.$container.append(this.pendingPlaceholders);
+        },
+
+        _getPlaceholderItemHeight: function () {
+            const firstProductItem = this.$container.find(this.options.infinite.itemSelector).first().get(0);
+
+            if (!firstProductItem) {
+                return 0;
+            }
+
+            return Math.ceil(firstProductItem.getBoundingClientRect().height);
+        },
+
+        _removePendingPlaceholders: function () {
+            if (!this.pendingPlaceholders.length) {
+                return;
+            }
+
+            this.pendingPlaceholders.forEach((placeholder) => placeholder.remove());
+            this.pendingPlaceholders = [];
+        },
+
+        _createPlaceholder: function (itemHeight) {
+            const placeholder = document.createElement('li');
+            const placeholderBody = document.createElement('div');
+
+            placeholder.className = `${this.options.infinite.productTilePlaceholderClassName}`;
+            placeholder.setAttribute('aria-hidden', 'true');
+            placeholder.style.minHeight = `${itemHeight}px`;
+            placeholderBody.className = `${this.options.infinite.productTilePlaceholderLoaderClassName}`;
+            placeholder.appendChild(placeholderBody);
+
+            return placeholder;
         },
 
         /**
@@ -458,10 +520,15 @@ define([
          * @param url
          * @private
          */
-        _loadPage: function (url) {
+        _loadPage: function (url, direction) {
             if (this.ajaxInProgress) {
                 return
             }
+
+            if (direction === this.DIRECTIONS.next) {
+                this._reserveSpaceForNextPage();
+            }
+
             this.ajaxInProgress = true;
 
             const self = this;
@@ -473,6 +540,9 @@ define([
                 cache: true,
                 success: function (response) {
                     self._afterPageLoad(response, url);
+                },
+                error: function () {
+                    self._removePendingPlaceholders();
                 },
                 complete: function () {
                     self.ajaxInProgress = false;
@@ -490,24 +560,32 @@ define([
             const self = this;
             history.pushState({}, document.title, newUrl);
             const responseDom = $($.parseHTML(response.productList));
+            const responseItems = responseDom.find(this.options.infinite.containerSelector).children();
             const scrollTop = window.scrollY;
             let directionToUpdate;
 
             // Next page
             if (response.curPage > self.options.items.curPage) {
-                if (this.options.infinite.triggerNextType === this.TRIGGER_TYPES.productTile) {
-                    $(`.${this.options.infinite.productTileTriggerClassName}`).before(responseDom.find(this.options.infinite.containerSelector).html())
+                if (this.pendingPlaceholders.length) {
+                    $(this.pendingPlaceholders[0]).before(responseItems);
+                    this._removePendingPlaceholders();
+                } else if (this.options.infinite.triggerNextType === this.TRIGGER_TYPES.productTile) {
+                    $(`.${this.options.infinite.productTileTriggerClassName}`).before(responseItems);
                 } else {
-                    $(this.options.infinite.containerSelector).append(responseDom.find(this.options.infinite.containerSelector).html());
+                    $(this.options.infinite.containerSelector).append(responseItems);
                 }
                 this.options.items.highestPage = response.curPage;
 
                 directionToUpdate = this.DIRECTIONS.next;
                 // Prev page
             } else {
-                $(this.options.infinite.containerSelector).prepend(responseDom.find(this.options.infinite.containerSelector).html());
+                $(this.options.infinite.containerSelector).prepend(responseItems);
                 this.options.items.lowestPage = response.curPage;
                 directionToUpdate = this.DIRECTIONS.prev;
+            }
+
+            if (directionToUpdate !== this.DIRECTIONS.next) {
+                this._removePendingPlaceholders();
             }
 
             if (this.restoreScrollAfterLoad) {
