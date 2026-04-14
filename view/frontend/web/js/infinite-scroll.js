@@ -45,7 +45,7 @@ define([
                 toolbarPaginationSelector: '.cs-toolbar__item--pagination',
                 productTileTriggerClassName: 'cs-infinite-scroll__brick',
                 productTilePlaceholderClassName: 'cs-grid-layout__brick cs-infinite-scroll__brick',
-                productTilePlaceholderLoaderClassName: 'cs-product-tile cs-infinite-scroll__placeholder-loader test',
+                productTilePlaceholderLoaderClassName: 'cs-product-tile cs-infinite-scroll__placeholder-loader',
                 backScrollYOffset: 0,
             },
             items: {
