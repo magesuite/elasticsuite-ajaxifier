@@ -34,7 +34,6 @@ class ProductList
         // addToolbarBlock has private visibility,
         // to avoid using mandatory patches to use a magesuite module, using Reflection seems the best approach
         $method = new \ReflectionMethod($block::class, 'addToolbarBlock');
-        $method->setAccessible(true);
         $method->invoke($block, $this->productCollection);
         return $this->productCollection;
     }
