@@ -28,6 +28,7 @@ class GettingAjaxResponseTest extends \Magento\TestFramework\TestCase\AbstractCo
 
     /**
      * @magentoAppArea frontend
+     * @magentoConfigFixture current_store catalog/frontend/grid_per_page_values 12,24,36
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/categories.php
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/products.php
      */
@@ -59,6 +60,7 @@ class GettingAjaxResponseTest extends \Magento\TestFramework\TestCase\AbstractCo
      * @magentoAppArea frontend
      * @magentoAppIsolation disabled
      * @magentoDbIsolation disabled
+     * @magentoConfigFixture current_store catalog/frontend/grid_per_page_values 12,24,36
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/categories.php
      * @magentoDataFixture MageSuite_ElasticsuiteAjaxifier::Test/Integration/_files/products.php
      */
